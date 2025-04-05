@@ -1,0 +1,110 @@
+services:
+  postgres:
+    image: postgres:16.3-alpine
+    restart: "no"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - my_network
+    env_file:
+      - .env
+
+  pgadmin:
+    image: dpage/pgadmin4:8.14.0
+    restart: "no"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+      - ./pgadmin/pgpass:/pgadmin4/pgpass
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/misc/ping || exit -1
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    entrypoint: /bin/sh -c "chmod 600 /pgadmin4/pgpass; /entrypoint.sh;"
+    networks:
+      - my_network
+    env_file:
+      - .env
+
+  liquibase:
+    container_name: liquibase
+    image: liquibase/liquibase:4.31-alpine
+    command: liquibase update --url=jdbc:postgresql://postgres:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --changelog-file=/migrations/db.changeLog-master.yaml
+    volumes:
+      - ./db/changelog/:/liquibase/migrations/
+    networks:
+      - my_network
+    depends_on:
+      - postgres
+
+#  broker:
+#    image: bitnami/kafka:3.9.0
+#    container_name: broker
+#    restart: unless-stopped
+#    networks:
+#      - kafka-network
+#      - my_network
+#    ports:
+#      - "9092:9092"  # localhost доступ
+#      - "29092:29092" # docker network доступ
+#    environment:
+#      KAFKA_ENABLE_KRAFT: "yes"
+#      KAFKA_CFG_PROCESS_ROLES: broker,controller
+#      KAFKA_CFG_NODE_ID: 1
+#      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
+#      KAFKA_CFG_LISTENERS: PLAINTEXT://:29092,CONTROLLER://:9093,PLAINTEXT_HOST://:9092
+#      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+#      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+#      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+#      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+#      ALLOW_PLAINTEXT_LISTENER: "yes"
+#    volumes:
+#      - kafka_data:/bitnami/kafka
+#
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    container_name: kafka-ui
+#    restart: unless-stopped
+#    networks:
+#      - kafka-network
+#      - my_network
+#    ports:
+#      - "8090:8080"
+#    environment:
+#      KAFKA_CLUSTERS_0_NAME: local
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
+
+networks:
+  kafka-network:
+    driver: bridge
+  my_network:
+
+volumes:
+  kafka_data:
+  postgres_data:
+  pgadmin_data:
