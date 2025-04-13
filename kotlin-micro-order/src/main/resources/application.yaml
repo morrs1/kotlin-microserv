@@ -8,4 +8,13 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      client-id: orders-service
+
+application:
+  kafka:
+      topic: create-orders-topic
+
 
