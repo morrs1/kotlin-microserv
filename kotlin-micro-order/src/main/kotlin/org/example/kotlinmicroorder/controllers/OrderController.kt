@@ -32,4 +32,11 @@ class OrderController {
         sender.send(UsersOrder(UUID.randomUUID(), UUID.randomUUID(), "gg@gmail.com", UUID.randomUUID(), LocalDate.now(), "Готов", ArrayList<Product>()))
         return ResponseEntity.ok("123")
     }
+
+    @GetMapping("/test1")
+    fun test1(): ResponseEntity<String> {
+        println(orderService.getUsersOrder(UUID.fromString("16163114-2950-41b8-a389-07a2a43e7c8c")))
+        return ResponseEntity.ok("123")
+    }
+
 }
