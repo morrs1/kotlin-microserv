@@ -1,0 +1,14 @@
+spring:
+  kafka:
+    consumer:
+      group-id: orders-group
+      bootstrap-servers: localhost:9092
+      client-id: orders-consumer
+      auto-offset-reset: earliest
+
+  application:
+    name: kotlin-micro-notification
+
+application:
+  kafka:
+    topic: create-orders-topic

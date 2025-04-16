@@ -12,9 +12,9 @@ spring:
     producer:
       bootstrap-servers: localhost:9092
       client-id: orders-service
-
 application:
   kafka:
       topic: create-orders-topic
-
+server:
+  port: 8070
 
