@@ -1,6 +1,7 @@
 package org.example.kotlinmicroorder.services
 
 import org.example.kotlinmicroorder.dao.OrderDao
+import org.example.kotlinmicroorder.dto.UsersOrder
 import org.example.kotlinmicroorder.models.Order
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -19,5 +20,9 @@ class OrderService {
     fun create(order: Order) {
         order.id = UUID.randomUUID()
         orderDao.create(order)
+    }
+
+    fun getUsersOrder(orderId: UUID): UsersOrder? {
+        return orderDao.getOrderWithUsersAndListOfProducts(orderId)
     }
 }
