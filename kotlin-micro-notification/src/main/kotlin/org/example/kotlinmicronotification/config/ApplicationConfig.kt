@@ -81,7 +81,6 @@ class ApplicationConfig() {
         @KafkaListener(topics = ["\${application.kafka.topic}"], containerFactory = "listenerContainerFactory")
         fun listen(@Payload values: List<UsersOrder>) {
             log.info("values, values.size:{}", values.size)
-            mailSender.send("grishkovea@gmail.com", "Тест", "Привет")
             values.forEach { value -> log.info(value.toString()) }
         }
     }
