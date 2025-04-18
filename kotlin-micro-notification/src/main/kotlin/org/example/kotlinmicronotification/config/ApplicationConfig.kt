@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.example.kotlinmicronotification.dto.UsersOrder
+import org.example.kotlinmicronotification.utils.MailSender
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -24,7 +25,8 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 
 
 @Configuration
-class ApplicationConfig(@Value("\${application.kafka.topic}") val topicName: String) {
+class ApplicationConfig() {
+
     companion object {
         private val log = LoggerFactory.getLogger(ApplicationConfig::class.java)
     }
@@ -42,7 +44,8 @@ class ApplicationConfig(@Value("\${application.kafka.topic}") val topicName: Str
         val props = kafkaProperties.buildConsumerProperties()
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = JsonDeserializer::class.java
-        props[TYPE_MAPPINGS] = "org.example.kotlinmicroorder.dto.UsersOrder:org.example.kotlinmicronotification.dto.UsersOrder"
+        props[TYPE_MAPPINGS] =
+            "org.example.kotlinmicroorder.dto.UsersOrder:org.example.kotlinmicronotification.dto.UsersOrder"
         props[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 3
         props[ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG] = 3_000
         val kafkaConsumerFactory = DefaultKafkaConsumerFactory<String, UsersOrder>(props)
@@ -70,15 +73,16 @@ class ApplicationConfig(@Value("\${application.kafka.topic}") val topicName: Str
     }
 
     @Bean
-    fun stringValueConsumer(): KafkaClient {
-        return KafkaClient()
+    fun stringValueConsumer(mailSender: MailSender): KafkaClient {
+        return KafkaClient(mailSender)
     }
 
-    class KafkaClient {
+    class KafkaClient(private val mailSender: MailSender) {
         @KafkaListener(topics = ["\${application.kafka.topic}"], containerFactory = "listenerContainerFactory")
         fun listen(@Payload values: List<UsersOrder>) {
             log.info("values, values.size:{}", values.size)
-            values.forEach{value -> log.info(value.toString())}
+            mailSender.send("grishkovea@gmail.com", "Тест", "Привет")
+            values.forEach { value -> log.info(value.toString()) }
         }
     }
 }
