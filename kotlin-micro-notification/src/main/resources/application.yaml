@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: "file:../.env[.properties]"
   kafka:
     consumer:
       group-id: orders-group
@@ -8,6 +10,15 @@ spring:
 
   application:
     name: kotlin-micro-notification
+  mail:
+    host: smtp.yandex.ru
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtps
+    port: 465
+
+mail:
+  debug: true
 
 application:
   kafka:
