@@ -6,7 +6,6 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.example.kotlinmicronotification.dto.UsersOrder
 import org.example.kotlinmicronotification.utils.MailSender
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,7 +24,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 
 
 @Configuration
-class ApplicationConfig() {
+class ApplicationConfig {
 
     companion object {
         private val log = LoggerFactory.getLogger(ApplicationConfig::class.java)
@@ -81,7 +80,10 @@ class ApplicationConfig() {
         @KafkaListener(topics = ["\${application.kafka.topic}"], containerFactory = "listenerContainerFactory")
         fun listen(@Payload values: List<UsersOrder>) {
             log.info("values, values.size:{}", values.size)
-            values.forEach { value -> log.info(value.toString()) }
+            values.forEach { value ->
+                log.info(value.toString())
+                mailSender.send(value.usersEmail, "Новый заказ", value.toString())
+            }
         }
     }
 }
