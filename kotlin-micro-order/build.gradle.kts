@@ -30,6 +30,7 @@ dependencies {
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	runtimeOnly("org.postgresql:postgresql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 }
 
 kotlin {
