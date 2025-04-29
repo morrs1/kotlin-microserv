@@ -1,0 +1,18 @@
+<configuration>
+    <!-- Наследуем стандартную конфигурацию Spring Boot -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Ваш файловый апендер -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${user.dir}/logs/app.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <root level="info">
+        <!-- Стандартный консольный апендер Spring Boot -->
+        <appender-ref ref="CONSOLE"/>
+        <!-- Ваш файловый апендер -->
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
