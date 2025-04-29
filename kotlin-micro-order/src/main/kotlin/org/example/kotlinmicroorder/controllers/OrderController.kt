@@ -6,6 +6,8 @@ import org.example.kotlinmicroorder.dto.UsersOrderResponse
 import org.example.kotlinmicroorder.models.Order
 import org.example.kotlinmicroorder.services.OrderService
 import org.example.kotlinmicroorder.utils.DataSender
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -13,6 +15,8 @@ import java.util.*
 @RestController
 @RequestMapping("/orders")
 class OrderController(private var orderService: OrderService, private var sender: DataSender) {
+
+    private val log: Logger = LoggerFactory.getLogger(OrderController::class.java)
 
     @GetMapping
     fun getAll(): List<Order> = orderService.getAll()
@@ -31,6 +35,7 @@ class OrderController(private var orderService: OrderService, private var sender
                 newOrder.listOfProducts
             )
         )
+        log.info("New order with id: ${newOrder.ordersId} created successfully")
         return newOrder
     }
 
